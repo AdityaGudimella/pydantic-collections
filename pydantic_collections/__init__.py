@@ -1,22 +1,13 @@
-__title__ = 'pydantic-collections'
-__version__ = '0.5.0'
+"""A collection of Pydantic models for common data structures."""
+__title__ = "pydantic-collections"
+__version__ = "0.5.2"
 
-from pydantic.version import VERSION as PYDANTIC_VERSION
+from pathlib import Path
 
-PYDANTIC_V2 = PYDANTIC_VERSION.startswith('2.')
+from .core import CollectionModelConfig
+from .sequence import PydanticSequence
+
+REPO_ROOT = Path(__file__).parent.parent.resolve()
 
 
-if PYDANTIC_V2:
-    from ._v2 import BaseCollectionModel, CollectionModelConfig
-
-    __all_v__ = ('CollectionModelConfig',)
-else:
-    from ._v1 import BaseCollectionModel
-
-    __all_v__ = ()
-
-__all__ = (
-    '__title__',
-    '__version__',
-    'BaseCollectionModel',
-) + __all_v__
+__all__ = ["__title__", "__version__", "CollectionModelConfig", "PydanticSequence"]
