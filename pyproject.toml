@@ -17,14 +17,12 @@ keywords = [
 ]
 license = "Apache 2"
 readme = "README.md"
-
-
 # Needed to indicate to libraries using this project that this project has type
 # annotations
 packages = [
   { include = "pydantic_collections" },
-  { include = "py.typed" },
 ]
+include = ["pydantic-collections/py.typed"]
 
 [build-system]
 requires = ["poetry-core"]
