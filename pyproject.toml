@@ -67,7 +67,7 @@ all = [
 ]
 
 [tool.pytest.ini_options]
-addopts = ["--strict-markers", "-p no:doctest", "--doctest-modules"]
+addopts = ["--strict-markers", "--xdoctest"]
 log_cli = true
 log_cli_level = "INFO"
 testpaths = ["tests", "docs"]

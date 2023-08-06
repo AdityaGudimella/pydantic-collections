@@ -1,4 +1,4 @@
-"""MutableSequence[pydantic.BaseModel] implementation."""
+"""MutableSequence implementation."""
 import typing as t
 from collections import abc as cabc
 
@@ -42,7 +42,7 @@ class PydanticSequence(
     def __init__(
         self,
         *data: BaseModelT,
-        root: t.Sequence[BaseModelT] | None = None,  # noqa: ANN401
+        root: t.Sequence[BaseModelT] | None = None,
         **kwargs: t.Any,  # noqa: ANN401
     ) -> None:
         """Initialize PydanticSequence.
@@ -122,16 +122,11 @@ class PydanticSequence(
         return f"{self.__class__.__name__}({self.root!r})"
 
     def __str__(self) -> str:
-        return repr(self)  # pragma: no cover
+        return repr(self)
 
     def insert(self, index: int, value: BaseModelT) -> None:
         """Insert value before index."""
         self.root.insert(index, self._validate_sequence_element(value, index))
-
-    def append(self, value: BaseModelT) -> None:
-        """Append value to the end of the sequence."""
-        index = len(self.root) + 1
-        self.root.append(self._validate_sequence_element(value, index))
 
     def sort(self, key: _SortedKey[BaseModelT], reverse: bool = False) -> None:
         """Sort the sequence in place."""
