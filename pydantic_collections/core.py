@@ -96,7 +96,6 @@ class BaseCollectionModel(
     _DEFAULT_VALIDATE_ASSIGNMENT_STRICT = True
 
     model_config = CollectionModelConfig(
-        extra="forbid",
         validate_assignment=_DEFAULT_VALIDATE_ASSIGNMENT,
         validate_assignment_strict=_DEFAULT_VALIDATE_ASSIGNMENT_STRICT,
     )
