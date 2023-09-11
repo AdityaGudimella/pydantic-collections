@@ -8,6 +8,7 @@ import pydantic_core as pdc
 from pydantic._internal._model_construction import ModelMetaclass
 
 from pydantic_collections import external_utils as extu
+from pydantic_collections.api import DataBase
 
 UnionType = getattr(types, "UnionType", t.Union)
 
@@ -95,7 +96,6 @@ class BaseCollectionModel(
     _DEFAULT_VALIDATE_ASSIGNMENT_STRICT = True
 
     model_config = CollectionModelConfig(
-        extra="forbid",
         validate_assignment=_DEFAULT_VALIDATE_ASSIGNMENT,
         validate_assignment_strict=_DEFAULT_VALIDATE_ASSIGNMENT_STRICT,
     )
@@ -148,3 +148,24 @@ class BaseCollectionModel(
                 title=self.__class__.__name__,
                 line_errors=errors,
             ) from e
+
+
+_KeyT = t.TypeVar("_KeyT")
+_ValueT = t.TypeVar("_ValueT")
+
+
+class NullDB(DataBase[_KeyT, _ValueT]):
+    """A null database that does nothing."""
+
+    def add(self, key: _KeyT, value: _ValueT) -> None:
+        """Add data to the database."""
+
+    def load(self) -> dict[_KeyT, _ValueT]:
+        """Load data from the database."""
+        return {}
+
+    def delete(self, id: _KeyT) -> None:
+        """Delete data from the database."""
+
+    def commit(self) -> None:
+        """Commit changes to the database."""

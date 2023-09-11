@@ -87,3 +87,32 @@ class PydanticCollection(abc.ABC):
     ) -> te.Self:
         """Validate a pydantic model instance from JSON."""
         raise NotImplementedError
+
+
+_KeyT = t.TypeVar("_KeyT")
+_ValueT = t.TypeVar("_ValueT")
+
+
+class DataBase(t.Protocol[_KeyT, _ValueT]):
+    """A protocol for persisting data."""
+
+    @property
+    def __persisting_data__(self) -> dict[_KeyT, _ValueT]:
+        """The data that will be persisted."""
+        raise NotImplementedError
+
+    def add(self, key: _KeyT, value: _ValueT) -> None:
+        """Add data to the database."""
+        raise NotImplementedError
+
+    def load(self) -> dict[_KeyT, _ValueT]:
+        """Load data from the database."""
+        raise NotImplementedError
+
+    def delete(self, id: _KeyT) -> None:
+        """Delete data from the database."""
+        raise NotImplementedError
+
+    def commit(self) -> None:
+        """Commit changes to the database."""
+        raise NotImplementedError

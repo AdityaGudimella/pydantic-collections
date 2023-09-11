@@ -4,6 +4,7 @@ from collections import abc as cabc
 
 import typing_extensions as te
 from pydantic import RootModel
+from pydantic_collections.api import DataBase
 
 from pydantic_collections.core import BaseCollectionModel, BaseModelT
 
@@ -86,7 +87,7 @@ class PydanticSequence(
         ...
 
     def __getitem__(  # pyright: ignore[reportIncompatibleMethodOverride]
-        self, index: t.Union[int, slice]
+        self, index: int | slice
     ) -> t.Union[BaseModelT, "BaseCollectionModel[BaseModelT]"]:
         if isinstance(index, slice):
             return self.__class__(self.root[index])
@@ -128,11 +129,6 @@ class PydanticSequence(
         """Insert value before index."""
         self.root.insert(index, self._validate_sequence_element(value, index))
 
-    def append(self, value: BaseModelT) -> None:
-        """Append value to the end of the sequence."""
-        index = len(self.root) + 1
-        self.root.append(self._validate_sequence_element(value, index))
-
     def sort(self, key: _SortedKey[BaseModelT], reverse: bool = False) -> None:
         """Sort the sequence in place."""
         self.root = sorted(self.root, key=key, reverse=reverse)
@@ -147,3 +143,65 @@ class PydanticSequence(
         if stop is None:
             stop = len(self.root)
         return range(start, stop, step or 1)
+
+
+_KeyT = t.TypeVar("_KeyT")
+
+
+class PersistentPydanticSequence(
+    PydanticSequence[BaseModelT], t.Generic[_KeyT, BaseModelT]
+):
+    """A PydanticSequence that persists its data to a file."""
+
+    def __init__(
+        self,
+        *data: BaseModelT,
+        persistence_db_overwrite: bool = False,
+        persistence_db: DataBase[_KeyT, BaseModelT],
+        persistance_db_key: str | t.Callable[[BaseModelT], _KeyT],
+        root: t.Sequence[BaseModelT] | None = None,
+        **kwargs: t.Any,  # noqa: ANN401
+    ) -> None:
+        """Initialize PersistentPydanticSequence.
+
+        Args:
+        ----
+        persistence_db_overwrite: bool
+            Whether to overwrite the database with the data in the sequence.
+        persistence_db: DataBase[_KeyT, BaseModelT]
+            The database to persist the data to.
+        persistance_db_key: str | t.Callable[[BaseModelT], _KeyT]
+            The key that acts as a primary key in the db.
+        """
+        super().__init__(*data, root=root, **kwargs)
+        self.__persistence_db_overwrite = persistence_db_overwrite
+        self.__persistence_db = persistence_db
+        self.__persistence_db_key = persistance_db_key
+
+    def __getitem__(  # pyright: ignore[reportIncompatibleMethodOverride]
+        self, index: int | slice
+    ) -> BaseModelT | "BaseCollectionModel[BaseModelT]":
+        """Get item at index."""
+        return super().__getitem__(index)
+
+    def __delitem__(self, index: t.Union[int, slice]) -> None:
+        """Delete item at index."""
+        super().__delitem__(index)
+
+    def __setitem__(
+        self, index: int | slice, value: BaseModelT | t.Iterable[BaseModelT]
+    ) -> None:
+        """Set item at index."""
+        super().__setitem__(index, value)  # type: ignore
+
+    def insert(self, index: int, value: BaseModelT) -> None:
+        """Insert value before index."""
+        super().insert(index, value)
+
+    def sort(self, key: _SortedKey[BaseModelT], reverse: bool = False) -> None:
+        """Sort the sequence in place."""
+        return super().sort(key, reverse)
+
+    def commit(self) -> None:
+        """Commit changes to persistence database."""
+        self.__persistence_db.commit()
